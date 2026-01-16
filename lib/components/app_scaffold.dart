@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../design/app_color_scheme.dart';
-import '../design/app_text_styles.dart';
+import '../app/theme/app_color_scheme.dart';
+import '../app/theme/app_text_styles.dart';
 
 class AppScaffold extends StatelessWidget {
   final String title;

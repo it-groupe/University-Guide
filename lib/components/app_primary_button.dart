@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../design/app_color_scheme.dart';
-import '../../design/app_radius.dart';
-import '../../design/app_text_styles.dart';
-import '../../design/app_shadows.dart';
+import '../app/theme/app_color_scheme.dart';
+import '../app/theme/app_radius.dart';
+import '../app/theme/app_text_styles.dart';
+import '../app/theme/app_shadows.dart';
 
 class AppPrimaryButton extends StatelessWidget {
   final String label;
