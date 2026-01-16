@@ -40,5 +40,5 @@ flutter:
       fonts:
         - asset: assets/fonts/Tajawal-Regular.ttf
           weight: 400
-        - asset: assets/fonts/tajawal-Medium.ttf
+        - asset: assets/fonts/Tajawal-Medium.ttf
           weight: 500
