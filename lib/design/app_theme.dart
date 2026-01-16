@@ -19,7 +19,6 @@ abstract class AppTheme {
     colorScheme: const ColorScheme.light(
       primary: AppColorScheme.brandPrimary,
       secondary: AppColorScheme.brandSecondary,
-      background: AppColorScheme.mainbackgroun,
       surface: AppColorScheme.surface,
       error: AppColorScheme.danger,
     ),

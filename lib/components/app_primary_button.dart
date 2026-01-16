@@ -7,14 +7,14 @@ import '../../design/app_shadows.dart';
 class AppPrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
-  final double Hight;
-  final double Width;
-  AppPrimaryButton({
+  final double hight;
+  final double width;
+  const AppPrimaryButton({
     super.key,
     required this.label,
     required this.onTap,
-    required this.Hight,
-    required this.Width,
+    required this.hight,
+    required this.width,
     //
   });
 
@@ -23,8 +23,8 @@ class AppPrimaryButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: Hight,
-        width: Width,
+        height: hight,
+        width: width,
         decoration: BoxDecoration(
           color: AppColorScheme.brandPrimary,
           borderRadius: BorderRadius.circular(AppRadius.button),
