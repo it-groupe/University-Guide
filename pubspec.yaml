@@ -11,10 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # iOS style icons
   cupertino_icons: ^1.0.8
 
-  # Icon libraries
   eva_icons_flutter: ^3.1.0
   material_design_icons_flutter: ^7.0.7296
 
@@ -42,5 +40,5 @@ flutter:
       fonts:
         - asset: assets/fonts/Tajawal-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Tajawal-Medium.ttf
+        - asset: assets/fonts/tajawal-Medium.ttf
           weight: 500
