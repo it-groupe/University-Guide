@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_9/app/navigation/main_bottom_nav.dart';
 import 'package:flutter_application_9/app/theme/app_theme.dart';
 
 class App extends StatelessWidget {
@@ -9,11 +10,12 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const _BootstrapPage(),
+      home: const MainBottomNav(),
     );
   }
 }
 
+// ignore: unused_element
 class _BootstrapPage extends StatelessWidget {
   const _BootstrapPage();
 

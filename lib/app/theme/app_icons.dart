@@ -11,70 +11,70 @@ abstract class AppIcons {
    *  🏠 عامة / تنقل
    * --------------------------------- */
 
-  static const IconData home = EvaIcons.homeOutline;
-  static const IconData search = EvaIcons.searchOutline;
-  static const IconData back = EvaIcons.arrowBackOutline;
-  static const IconData menu = EvaIcons.menu2Outline;
-  static const IconData notifications = EvaIcons.bellOutline;
+  static const IconData home = Icons.home_outlined;
+  static const IconData search = Icons.search_outlined;
+  static const IconData back = Icons.arrow_back;
+  static const IconData menu = Icons.menu;
+  static const IconData notifications = Icons.notifications_none;
 
   /* ---------------------------------
    *  🎓 الدليل الجامعي
    * --------------------------------- */
 
-  static final IconData college = MdiIcons.domain;
-  static final IconData university = MdiIcons.schoolOutline;
-  static final IconData department = MdiIcons.officeBuildingOutline;
-  static final IconData major = MdiIcons.bookEducationOutline;
+  static final IconData college = Icons.corporate_fare_rounded;
+  static final IconData university = Icons.account_balance;
+  static final IconData department = Icons.apartment;
+  static final IconData major = Icons.school_outlined;
 
   /* ---------------------------------
    *  📚 محتوى أكاديمي
    * --------------------------------- */
 
-  static final IconData subjects = EvaIcons.bookOpenOutline;
-  static final IconData plan = MdiIcons.mapOutline;
-  static final IconData schedule = EvaIcons.calendarOutline;
-  static final IconData exam = MdiIcons.fileDocumentOutline;
+  static final IconData subjects = Icons.menu_book_outlined;
+  static final IconData plan = Icons.view_list_outlined;
+  static final IconData schedule = Icons.schedule_outlined;
+  static const IconData exam = Icons.document_scanner;
 
   /* ---------------------------------
    *  👨‍🏫 أشخاص
    * --------------------------------- */
 
-  static final IconData doctor = MdiIcons.accountTieOutline;
-  static final IconData student = EvaIcons.personOutline;
-  static final IconData group = EvaIcons.peopleOutline;
+  static final IconData doctor = MdiIcons.doctor;
+  static const IconData student = Icons.person_pin;
+  static final IconData group = Icons.group;
 
   /* ---------------------------------
    *  📍 مواقع ومرافق
    * --------------------------------- */
 
-  static final IconData location = EvaIcons.pinOutline;
+  static final IconData location = Icons.location_on_outlined;
   static final IconData building = MdiIcons.officeBuilding;
   static final IconData lab = MdiIcons.flaskOutline;
-  static final IconData library = MdiIcons.libraryOutline;
+  static final IconData library = MdiIcons.libraryShelves;
 
   /* ---------------------------------
    *  ⚙️ إعدادات
    * --------------------------------- */
 
-  static final IconData settings = EvaIcons.settingsOutline;
-  static final IconData help = EvaIcons.questionMarkCircleOutline;
-  static final IconData info = EvaIcons.infoOutline;
-  static final IconData logout = EvaIcons.logOutOutline;
+  static const IconData settings = EvaIcons.settingsOutline;
+  static const IconData help = EvaIcons.questionMarkCircleOutline;
+  static const IconData info = EvaIcons.infoOutline;
+  static const IconData logout = EvaIcons.logOutOutline;
 
   /* ---------------------------------
    *  🟢 حالات / Status
    * --------------------------------- */
 
-  static final IconData success = EvaIcons.checkmarkCircle2Outline;
-  static final IconData warning = EvaIcons.alertTriangleOutline;
-  static final IconData error = EvaIcons.closeCircleOutline;
+  static final IconData success = Icons.check_circle_outlined;
+  static const IconData warning = EvaIcons.alertTriangleOutline;
+  static const IconData error = EvaIcons.closeCircleOutline;
 
   /* ---------------------------------
    *  ➕ أفعال
    * --------------------------------- */
 
   static final IconData add = Icons.add;
-  static final IconData edit = EvaIcons.editOutline;
-  static final IconData delete = EvaIcons.trash2Outline;
-  static final IconData share = EvaIcons.shareOutline;
+  static final IconData edit = Icons.edit_outlined;
+  static final IconData delete = Icons.delete_outlined;
+  static final IconData share = MdiIcons.share;
 }
