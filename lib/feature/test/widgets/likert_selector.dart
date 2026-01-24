@@ -36,7 +36,7 @@ class LikertSelector extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: selected
-                          ? AppColorScheme.brandPrimary.withOpacity(0.12)
+                          ? AppColorScheme.brandPrimary.withValues(alpha: 0.12)
                           : AppColorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
