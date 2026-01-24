@@ -53,3 +53,11 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *.stackdump
+
+
+
+# Flutter workspace metadata
+.metadata
+
+# Generated macOS plugin registrant (generated)
+macos/Flutter/GeneratedPluginRegistrant.swift
