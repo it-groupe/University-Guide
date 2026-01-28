@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_9/app/theme/app_icons.dart';
 import 'package:flutter_application_9/app/theme/widgets/app_scaffold.dart';
+import 'package:flutter_application_9/feature/test/logic/tests_controller.dart';
+import 'package:provider/provider.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_text_styles.dart';
 
@@ -36,7 +38,12 @@ class TestInstructionsPage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const QuestionPage()),
+                    MaterialPageRoute(
+                      builder: (_) => ChangeNotifierProvider(
+                        create: (_) => TestsController()..start(),
+                        child: const QuestionPage(),
+                      ),
+                    ),
                   );
                 },
                 child: const Text('متابعة'),

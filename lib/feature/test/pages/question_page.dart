@@ -1,84 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_9/app/theme/app_color_scheme.dart';
 import 'package:flutter_application_9/app/theme/app_icons.dart';
 import 'package:flutter_application_9/app/theme/widgets/app_scaffold.dart';
+import 'package:flutter_application_9/feature/test/logic/tests_controller.dart';
+import 'package:provider/provider.dart';
+
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_text_styles.dart';
-
 import '../widgets/likert_selector.dart';
 
-import 'package:flutter_application_9/feature/test/data/repositories/test_repository.dart';
-import 'package:flutter_application_9/feature/test/data/models/question_model.dart';
-import 'package:flutter_application_9/feature/test/data/models/likert_point_model.dart';
-
-class QuestionPage extends StatefulWidget {
+class QuestionPage extends StatelessWidget {
   const QuestionPage({super.key});
 
   @override
-  State<QuestionPage> createState() => _QuestionPageState();
-}
-
-class _QuestionPageState extends State<QuestionPage> {
-  int? selected;
-
-  late final Future<QuestionModel> _questionFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    // ✅ أول سؤال فعلي من DB (CORE أول سؤال)
-    _questionFuture = TestRepository.instance.getFirstCoreQuestion();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final c = context.watch<TestsController>();
+
     return AppScaffold(
       title: 'اختبار',
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
         icon: const Icon(AppIcons.back),
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: FutureBuilder<QuestionModel>(
-          future: _questionFuture,
-          builder: (context, snapshot) {
-            // 1) تحميل
-            if (snapshot.connectionState == ConnectionState.waiting) {
+        child: Builder(
+          builder: (_) {
+            if (c.isLoading && !c.hasQuestion) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // 2) خطأ
-            if (snapshot.hasError) {
+            if (c.error != null && !c.hasQuestion) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('حدث خطأ أثناء تحميل السؤال', style: AppTextStyles.h2),
+                  Text('حدث خطأ', style: AppTextStyles.h2),
                   const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    snapshot.error.toString(),
-                    style: AppTextStyles.bodyMuted,
-                  ),
+                  Text(c.error!, style: AppTextStyles.bodyMuted),
                   const SizedBox(height: AppSpacing.lg),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () => setState(() {
-                        selected = null;
-                        // إعادة المحاولة
-                        // (ملاحظة: FutureBuilder لا يعيد التشغيل إلا لو غيّرنا الـ future)
-                        // أسهل: استخدم FutureBuilder مع key أو خزّن future في متغير قابل للتبديل.
-                        // الآن نعمل حل سريع:
-                        // ignore: invalid_use_of_visible_for_testing_member
-                      }),
+                      onPressed: () => context.read<TestsController>().retry(),
                       child: const Text('محاولة مرة أخرى'),
                     ),
                   ),
                 ],
               );
             }
+            if (!c.hasQuestion) {
+              return Center(
+                child: ElevatedButton(
+                  onPressed: () => context.read<TestsController>().start(),
+                  child: const Text('ابدأ تحميل الأسئلة'),
+                ),
+              );
+            }
 
-            // 3) نجاح
-            final q = snapshot.data!;
+            final q = c.question!;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -87,49 +67,90 @@ class _QuestionPageState extends State<QuestionPage> {
                 Text(q.text, style: AppTextStyles.body),
                 const SizedBox(height: AppSpacing.lg),
 
-                // ✅ لو Likert: اجلب نقاط ليكرت من DB واعرضها
-                if (q.isLikert && q.scaleId != null)
-                  FutureBuilder<List<LikertPointModel>>(
-                    future: TestRepository.instance.getLikertPoints(q.scaleId!),
-                    builder: (context, ps) {
-                      if (ps.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      if (ps.hasError) {
-                        return Text(
-                          'خطأ في تحميل مقياس ليكرت: ${ps.error}',
-                          style: AppTextStyles.bodyMuted,
-                        );
-                      }
-
-                      final points = ps.data ?? const <LikertPointModel>[];
-                      return LikertSelector(
-                        value: selected,
-                        points: points,
-                        onChanged: (v) => setState(() => selected = v),
+                if (q.isLikert)
+                  LikertSelector(
+                    value: c.selctedLikretValue,
+                    points: c.likretPoints,
+                    onChanged: (v) =>
+                        context.read<TestsController>().selectLikret(v),
+                  )
+                else if (q.isSingleChoice)
+                  Column(
+                    children: c.choices.map((ch) {
+                      final selected = c.selectedChoiceId == ch.id;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => context
+                              .read<TestsController>()
+                              .selectChoice(ch.id),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? AppColorScheme.brandPrimary.withValues(
+                                      alpha: 0.08,
+                                    )
+                                  : AppColorScheme.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: selected
+                                    ? AppColorScheme.brandPrimary
+                                    : AppColorScheme.border,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    ch.text,
+                                    style: AppTextStyles.body,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  selected
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_off,
+                                  color: selected
+                                      ? AppColorScheme.brandPrimary
+                                      : AppColorScheme.textDisabled,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       );
-                    },
+                    }).toList(),
                   )
                 else
                   Text(
-                    'نوع السؤال الحالي غير مدعوم بعد (${q.type}).',
+                    'نوع السؤال غير مدعوم بعد (${q.type}).',
                     style: AppTextStyles.bodyMuted,
                   ),
+
+                if (c.error != null) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  Text(c.error!, style: AppTextStyles.bodyMuted),
+                ],
 
                 const Spacer(),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: selected == null
+                    onPressed:
+                        (q.isLikert && c.selctedLikretValue == null) ||
+                            (q.isSingleChoice && c.selectedChoiceId == null)
                         ? null
-                        : () {
-                            // TODO: لاحقًا: حفظ الإجابة + الانتقال للسؤال التالي
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('التالي: قريبًا')),
-                            );
-                          },
-                    child: const Text('التالي'),
+                        : () => context.read<TestsController>().next(),
+                    child: c.isLoading
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('التالي'),
                   ),
                 ),
               ],
