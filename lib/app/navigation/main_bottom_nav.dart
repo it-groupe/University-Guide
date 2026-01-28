@@ -43,6 +43,7 @@ class _MainBottomNavState extends State<MainBottomNav> {
         onNotificationsTap: onNotificationsTap,
       ),
 
+      //  safeArea تم استخدامها هنا عشان تمنع تداخل البادنج الخاص بال ابار مع البادنج الخاص بالبودي
       body: SafeArea(
         top: false,
         child: Directionality(

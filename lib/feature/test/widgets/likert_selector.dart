@@ -18,7 +18,6 @@ class LikertSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // احتياط: لو DB رجع نقاط فارغة لأي سبب
     if (points.isEmpty) {
       return Text('لا توجد نقاط مقياس ليكرت.', style: AppTextStyles.bodyMuted);
     }
@@ -29,7 +28,6 @@ class LikertSelector extends StatelessWidget {
         Text('اختر درجة الموافقة:', style: AppTextStyles.label),
         const SizedBox(height: AppSpacing.sm),
 
-        // أزرار 1..5
         Row(
           children: List.generate(points.length, (i) {
             final p = points[i];
@@ -75,7 +73,6 @@ class LikertSelector extends StatelessWidget {
 
         const SizedBox(height: AppSpacing.md),
 
-        // وصف النقطة المختارة (عربي) من DB
         if (value != null)
           Container(
             width: double.infinity,

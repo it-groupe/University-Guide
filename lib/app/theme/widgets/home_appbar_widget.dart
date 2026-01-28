@@ -18,6 +18,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
+  // عشان يكون ارتفاع ال ابار ثابت من مكتبة اللغة نفسها
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
