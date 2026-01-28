@@ -15,14 +15,14 @@ class App extends StatelessWidget {
   }
 }
 
-// ignore: unused_element
-class _BootstrapPage extends StatelessWidget {
-  const _BootstrapPage();
+// // ignore: unused_element
+// class _BootstrapPage extends StatelessWidget {
+//   const _BootstrapPage();
 
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('University Guide - Bootstrapped')),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return const Scaffold(
+//       body: Center(child: Text('University Guide - Bootstrapped')),
+//     );
+//   }
+// }
