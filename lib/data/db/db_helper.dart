@@ -4,7 +4,9 @@ import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
 class DbHelper {
+  //  يمنع اي محاولة لانشاء كائن من خارج الكلاس
   DbHelper._internal();
+
   static final DbHelper instance = DbHelper._internal();
   static const String dbName = 'uniguide.db';
   static const int dbVersion = 1;

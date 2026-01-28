@@ -16,7 +16,6 @@ class TestLocalDataSource {
     return TestModel.fromMap(rows.first);
   }
 
-  /// أول سؤال من مجموعة CORE بناءً على test_id النشط
   Future<QuestionModel> getFirstCoreQuestion(int testId) async {
     final rows = await db.rawQuery(
       '''
@@ -37,7 +36,6 @@ class TestLocalDataSource {
     return QuestionModel.fromMap(rows.first);
   }
 
-  /// نقاط مقياس ليكرت (1..5 مع labels العربية من DB)
   Future<List<LikertPointModel>> getLikertPoints(int scaleId) async {
     final rows = await db.query(
       'likert_scale_points',
