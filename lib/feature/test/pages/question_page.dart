@@ -100,7 +100,7 @@ class QuestionPage extends StatelessWidget {
                     Expanded(
                       child: ListView.separated(
                         itemCount: results.length,
-                        separatorBuilder: (_, __) =>
+                        separatorBuilder: (context, snapshot) =>
                             const SizedBox(height: AppSpacing.sm),
                         itemBuilder: (_, i) {
                           final r = results[i];

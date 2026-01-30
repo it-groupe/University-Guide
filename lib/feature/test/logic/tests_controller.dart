@@ -3,7 +3,6 @@ import 'package:flutter_application_9/feature/test/data/models/likert_point_mode
 import 'package:flutter_application_9/feature/test/data/models/major_score_model.dart';
 import 'package:flutter_application_9/feature/test/data/models/question_choice_model.dart';
 import 'package:flutter_application_9/feature/test/data/models/question_model.dart';
-import 'package:flutter_application_9/feature/test/data/models/test_model.dart';
 import 'package:flutter_application_9/feature/test/data/repositories/test_repository.dart';
 
 enum TestPhase { idle, core, probe, focused, validation, done }
@@ -15,7 +14,6 @@ class TestsController extends ChangeNotifier {
   List<MajorScoreModel> topMajors = const [];
 
   int? get attemptId => _attemptId;
-  TestModel? _activeTest;
 
   bool isLoading = false;
   String? error;
@@ -319,8 +317,9 @@ class TestsController extends ChangeNotifier {
 
     if (q.isLikert) {
       final v = selctedLikretValue;
-      if (v == null)
+      if (v == null) {
         throw StateError('Likert value is null for a likert question.');
+      }
       await _repo.saveLikertAnswer(
         attemptId: attemptId,
         questionId: q.id,
@@ -331,8 +330,9 @@ class TestsController extends ChangeNotifier {
 
     if (q.isSingleChoice) {
       final cid = selectedChoiceId;
-      if (cid == null)
+      if (cid == null) {
         throw StateError('Choice id is null for a single_choice question.');
+      }
       await _repo.saveChoiceAnswer(
         attemptId: attemptId,
         questionId: q.id,
@@ -354,7 +354,6 @@ class TestsController extends ChangeNotifier {
     phase = TestPhase.idle;
     _seenQuestionIds.clear();
     _attemptId = null;
-    _activeTest = null;
     _seenQuestionIds.clear();
     traitScores.clear();
     _queue.clear();
