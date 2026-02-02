@@ -37,15 +37,14 @@ class TestInstructionsPage extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  final c = context.read<TestsController>();
+                  c.retry();
+                  c.start();
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ChangeNotifierProvider(
-                        create: (_) => TestsController()..start(),
-                        child: const QuestionPage(),
-                      ),
-                    ),
+                    MaterialPageRoute(builder: (_) => const QuestionPage()),
                   );
                 },
+
                 child: const Text('متابعة'),
               ),
             ),

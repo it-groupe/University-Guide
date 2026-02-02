@@ -3,6 +3,7 @@ import 'package:flutter_application_9/app/theme/app_color_scheme.dart';
 import 'package:flutter_application_9/app/theme/app_icons.dart';
 import 'package:flutter_application_9/app/theme/widgets/app_scaffold.dart';
 import 'package:flutter_application_9/feature/test/logic/tests_controller.dart';
+import 'package:flutter_application_9/feature/test/pages/test_results_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/theme/app_spacing.dart';
@@ -27,11 +28,11 @@ class QuestionPage extends StatelessWidget {
         child: Builder(
           builder: (_) {
             // 1) Loading before first question
-            if (c.isLoading && !c.hasQuestion) {
+            if (c.isLoading && !c.hasQuestion && c.phase != TestPhase.done) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // 2) Error before first question
+            // 2) Error before first question (not done)
             if (c.error != null &&
                 !c.hasQuestion &&
                 c.phase != TestPhase.done) {
@@ -53,22 +54,18 @@ class QuestionPage extends StatelessWidget {
               );
             }
 
-            // 3) Done state -> show results
+            // 3) Done state -> navigate to results page (not render results here)
             if (c.phase == TestPhase.done || !c.hasQuestion) {
-              // ملاحظة: إذا كانت _finalizeResults شغّالة قد تكون isLoading=true لفترة قصيرة
               if (c.isLoading) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('جارٍ تجهيز النتائج...', style: AppTextStyles.h2),
+                    Text('جارٍ إنهاء الاختبار...', style: AppTextStyles.h2),
                     const SizedBox(height: AppSpacing.md),
                     const Center(child: CircularProgressIndicator()),
                   ],
                 );
               }
-
-              final results =
-                  c.topMajors; // لازم تكون موجودة في TestsController
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,124 +73,40 @@ class QuestionPage extends StatelessWidget {
                   Text('انتهى الاختبار', style: AppTextStyles.h2),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'هذه أفضل التخصصات المقترحة بناءً على إجاباتك:',
+                    'يمكنك الآن عرض نتيجتك بالتفصيل.',
                     style: AppTextStyles.bodyMuted,
                   ),
                   const SizedBox(height: AppSpacing.lg),
 
-                  if (results.isEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: AppColorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColorScheme.border),
-                      ),
-                      child: Text(
-                        'لا توجد نتائج متاحة حاليًا. تأكد أن Controller ينفذ _finalizeResults ويملأ topMajors.',
-                        style: AppTextStyles.bodyMuted,
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  else
-                    Expanded(
-                      child: ListView.separated(
-                        itemCount: results.length,
-                        separatorBuilder: (context, snapshot) =>
-                            const SizedBox(height: AppSpacing.sm),
-                        itemBuilder: (_, i) {
-                          final r = results[i];
-
-                          final rank = r.rank;
-                          final name = r.name;
-                          final college = r.college ?? '';
-                          final score = r.score;
-
-                          final isTop = rank == 1;
-
-                          return Container(
-                            padding: const EdgeInsets.all(AppSpacing.md),
-                            decoration: BoxDecoration(
-                              color: isTop
-                                  ? AppColorScheme.brandPrimary.withValues(
-                                      alpha: 0.08,
-                                    )
-                                  : AppColorScheme.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isTop
-                                    ? AppColorScheme.brandPrimary
-                                    : AppColorScheme.border,
-                              ),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: AppColorScheme.surface,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: AppColorScheme.border,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '$rank',
-                                      style: AppTextStyles.body.copyWith(
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.md),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        name,
-                                        style: AppTextStyles.body.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      if (college.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          college,
-                                          style: AppTextStyles.bodyMuted,
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.md),
-                                Text(
-                                  score.toStringAsFixed(2),
-                                  style: AppTextStyles.body.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                  const SizedBox(height: AppSpacing.lg),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // خيار: إعادة الاختبار من جديد
-                        // إذا تبغى، خلّها تشتغل retry لكن الأفضل reset مخصص
-                        c.retry();
-                      },
+                      onPressed: (c.attemptId == null)
+                          ? null
+                          : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChangeNotifierProvider.value(
+                                    value: c,
+                                    child: TestResultsPage(
+                                      attemptId: c.attemptId,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+
+                      child: const Text('عرض النتيجة'),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.md),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () => c.retry(),
                       child: const Text('إعادة الاختبار'),
                     ),
                   ),
@@ -306,11 +219,14 @@ class QuestionPage extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 Text(q.text, style: AppTextStyles.body),
                 const SizedBox(height: AppSpacing.lg),
+
                 answerWidget,
+
                 if (c.error != null) ...[
                   const SizedBox(height: AppSpacing.md),
                   Text(c.error!, style: AppTextStyles.bodyMuted),
                 ],
+
                 const Spacer(),
                 SizedBox(
                   width: double.infinity,

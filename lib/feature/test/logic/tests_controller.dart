@@ -12,7 +12,8 @@ class TestsController extends ChangeNotifier {
 
   int? _attemptId;
   List<MajorScoreModel> topMajors = const [];
-
+  bool isResultsLoading = false;
+  String? resultsError;
   int? get attemptId => _attemptId;
 
   bool isLoading = false;
@@ -56,7 +57,11 @@ class TestsController extends ChangeNotifier {
 
     try {
       final test = await _repo.getActiveTest();
-      _attemptId = await _repo.createAttempt(testId: test.id);
+      const localStudentId = 1;
+      _attemptId = await _repo.createAttempt(
+        testId: test.id,
+        studentId: localStudentId,
+      );
 
       _core = await _repo.getCoreQuestions();
       _coreIndex = 0;
@@ -139,23 +144,18 @@ class TestsController extends ChangeNotifier {
           phase = TestPhase.done;
           question = null;
 
-          // اختياري: إنهاء attempt إذا وصلنا للنهاية هنا
-          // if (_attemptId != null) await _repo.completeAttempt(_attemptId!);
-
           return;
         }
         await _setQuestion(_core[_coreIndex]);
         return;
       }
 
-      // ✅ queue-based phases
       if (_queue.isNotEmpty) {
         final nextQ = _queue.removeAt(0);
         await _setQuestion(nextQ);
         return;
       }
 
-      // ✅ transitions when queue is empty
       if (phase == TestPhase.probe) {
         await _buildFocusedQueue();
         if (_queue.isEmpty) {
@@ -163,7 +163,6 @@ class TestsController extends ChangeNotifier {
           phase = TestPhase.done;
           question = null;
 
-          // if (_attemptId != null) await _repo.completeAttempt(_attemptId!);
           return;
         }
         phase = TestPhase.focused;
@@ -190,10 +189,11 @@ class TestsController extends ChangeNotifier {
         phase = TestPhase.done;
         question = null;
 
-        // ✅ أنهِ attempt هنا (هذه النهاية الطبيعية للاختبار)
         if (_attemptId != null) {
           await _finalizeResults();
         }
+
+        await loadResults();
         return;
       }
     } catch (e) {
@@ -207,7 +207,6 @@ class TestsController extends ChangeNotifier {
   Future<void> _scoreLikertAnswer(QuestionModel q, int rawValue) async {
     final weights = await _repo.getTraitWeightsForQuestion(q.id);
 
-    // reverse if needed (1..5)
     final v = q.isReverse ? (6 - rawValue) : rawValue;
 
     for (final w in weights) {
@@ -228,7 +227,6 @@ class TestsController extends ChangeNotifier {
         ? _scienceTraits
         : _literaryTraits;
 
-    // 1) اجلب 2 سؤال لكل trait
     final buckets = <List<QuestionModel>>[];
     for (final traitId in traitIds) {
       final qs = await _repo.getTraitQuestions(
@@ -240,7 +238,6 @@ class TestsController extends ChangeNotifier {
       buckets.add(qs);
     }
 
-    // 2) Interleave
     _queue.addAll(_interleave(buckets));
 
     if (_queue.isEmpty) {
@@ -359,7 +356,9 @@ class TestsController extends ChangeNotifier {
     _queue.clear();
     _core = const [];
     _coreIndex = 0;
-
+    topMajors = const [];
+    resultsError = null;
+    isResultsLoading = false;
     notifyListeners();
     await start();
   }
@@ -405,5 +404,38 @@ class TestsController extends ChangeNotifier {
 
     // 5) إنهاء attempt
     await _repo.completeAttempt(attemptId);
+  }
+
+  Future<void> loadResults({int? attemptId}) async {
+    final id = attemptId ?? _attemptId;
+    if (id == null) {
+      resultsError = 'لا يوجد attemptId لعرض النتائج.';
+      topMajors = const [];
+      notifyListeners();
+      return;
+    }
+
+    isResultsLoading = true;
+    resultsError = null;
+    notifyListeners();
+
+    try {
+      topMajors = await _repo.getAttemptMajorScores(id, limit: 5);
+    } catch (e) {
+      resultsError = e.toString();
+      topMajors = const [];
+    } finally {
+      isResultsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<int?> loadLastCompletedAttemptId() async {
+    final test = await _repo.getActiveTest();
+    const localStudentId = 1; // مؤقتًا إلى أن نضيف login
+    return _repo.getLastCompletedAttemptId(
+      testId: test.id,
+      studentId: localStudentId,
+    );
   }
 }

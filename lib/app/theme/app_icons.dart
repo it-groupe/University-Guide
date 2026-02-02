@@ -68,6 +68,8 @@ abstract class AppIcons {
   static final IconData success = Icons.check_circle_outlined;
   static const IconData warning = EvaIcons.alertTriangleOutline;
   static const IconData error = EvaIcons.closeCircleOutline;
+  static const IconData favorite = Icons.favorite;
+  static const IconData chevronleft = Icons.chevron_left;
 
   /* ---------------------------------
    *  ➕ أفعال

@@ -196,4 +196,13 @@ class TestRepository {
     final rows = await ds.getAttemptMajorScores(attemptId, limit: limit);
     return rows.map(MajorScoreModel.fromMap).toList();
   }
+
+  Future<int?> getLastCompletedAttemptId({
+    required int testId,
+    required int studentId,
+  }) async {
+    final db = await DbHelper.instance.database;
+    final ds = TestLocalDataSource(db);
+    return ds.getLastCompletedAttemptId(testId: testId, studentId: studentId);
+  }
 }

@@ -382,4 +382,21 @@ class TestLocalDataSource {
       [attemptId, limit],
     );
   }
+
+  Future<int?> getLastCompletedAttemptId({
+    required int testId,
+    required int studentId,
+  }) async {
+    final rows = await db.query(
+      'attempts',
+      columns: ['attempt_id'],
+      where: 'test_id = ? AND student_id = ? AND status = ?',
+      whereArgs: [testId, studentId, 'completed'],
+      orderBy: 'completed_at DESC, attempt_id DESC',
+      limit: 1,
+    );
+
+    if (rows.isEmpty) return null;
+    return rows.first['attempt_id'] as int?;
+  }
 }
