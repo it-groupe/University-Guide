@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_9/feature/test/data/models/likert_point_model.dart';
 import 'package:flutter_application_9/feature/test/data/models/major_score_model.dart';
+import 'package:flutter_application_9/feature/test/data/models/attempt_summary_model.dart';
 import 'package:flutter_application_9/feature/test/data/models/question_choice_model.dart';
 import 'package:flutter_application_9/feature/test/data/models/question_model.dart';
 import 'package:flutter_application_9/feature/test/data/repositories/test_repository.dart';
@@ -14,6 +15,11 @@ class TestsController extends ChangeNotifier {
   List<MajorScoreModel> topMajors = const [];
   bool isResultsLoading = false;
   String? resultsError;
+
+  // سجل النتائج محاولات مكتملة)
+  List<AttemptSummaryModel> completed_attempts = const [];
+  bool isHistoryLoading = false;
+  String? historyError;
   int? get attemptId => _attemptId;
 
   bool isLoading = false;
@@ -57,11 +63,7 @@ class TestsController extends ChangeNotifier {
 
     try {
       final test = await _repo.getActiveTest();
-      const localStudentId = 1;
-      _attemptId = await _repo.createAttempt(
-        testId: test.id,
-        studentId: localStudentId,
-      );
+      _attemptId = await _repo.createAttempt(testId: test.id, studentId: null);
 
       _core = await _repo.getCoreQuestions();
       _coreIndex = 0;
@@ -122,21 +124,17 @@ class TestsController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // ✅ 0) احفظ الإجابة في DB (Likert أو Choice)
       await _saveCurrentAnswer(q);
 
-      // ✅ 1) score current answer (likert only)
       if (q.isLikert) {
         await _scoreLikertAnswer(q, selctedLikretValue!);
       }
 
-      // ✅ 2) handle gate question specifically (بعد الحفظ)
       if (q.code == 'CORE_GATE') {
         await _handleGate();
         return;
       }
 
-      // ✅ 3) move forward depending on phase
       if (phase == TestPhase.core) {
         _coreIndex++;
         if (_coreIndex >= _core.length) {
@@ -432,10 +430,27 @@ class TestsController extends ChangeNotifier {
 
   Future<int?> loadLastCompletedAttemptId() async {
     final test = await _repo.getActiveTest();
-    const localStudentId = 1; // مؤقتًا إلى أن نضيف login
-    return _repo.getLastCompletedAttemptId(
-      testId: test.id,
-      studentId: localStudentId,
-    );
+    return _repo.getLastCompletedAttemptId(testId: test.id, studentId: null);
+  }
+
+  Future<void> loadCompletedAttempts({int limit = 50}) async {
+    if (isHistoryLoading) return;
+    isHistoryLoading = true;
+    historyError = null;
+    notifyListeners();
+
+    try {
+      final test = await _repo.getActiveTest();
+      completed_attempts = await _repo.getCompletedAttempts(
+        testId: test.id,
+        studentId: null,
+        limit: limit,
+      );
+    } catch (e) {
+      historyError = e.toString();
+    } finally {
+      isHistoryLoading = false;
+      notifyListeners();
+    }
   }
 }

@@ -383,15 +383,46 @@ class TestLocalDataSource {
     );
   }
 
+  Future<List<Map<String, Object?>>> getCompletedAttempts({
+    required int testId,
+    int? studentId,
+    int limit = 50,
+  }) async {
+    final where = StringBuffer('test_id = ? AND status = ?');
+    final args = <Object?>[testId, 'completed'];
+
+    if (studentId != null) {
+      where.write(' AND student_id = ?');
+      args.add(studentId);
+    }
+
+    return db.query(
+      'attempts',
+      columns: ['attempt_id', 'started_at', 'completed_at'],
+      where: where.toString(),
+      whereArgs: args,
+      orderBy: 'completed_at DESC, attempt_id DESC',
+      limit: limit,
+    );
+  }
+
   Future<int?> getLastCompletedAttemptId({
     required int testId,
-    required int studentId,
+    int? studentId,
   }) async {
+    final where = StringBuffer('test_id = ? AND status = ?');
+    final args = <Object?>[testId, 'completed'];
+
+    if (studentId != null) {
+      where.write(' AND student_id = ?');
+      args.add(studentId);
+    }
+
     final rows = await db.query(
       'attempts',
       columns: ['attempt_id'],
-      where: 'test_id = ? AND student_id = ? AND status = ?',
-      whereArgs: [testId, studentId, 'completed'],
+      where: where.toString(),
+      whereArgs: args,
       orderBy: 'completed_at DESC, attempt_id DESC',
       limit: 1,
     );

@@ -27,12 +27,10 @@ class QuestionPage extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Builder(
           builder: (_) {
-            // 1) Loading before first question
             if (c.isLoading && !c.hasQuestion && c.phase != TestPhase.done) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // 2) Error before first question (not done)
             if (c.error != null &&
                 !c.hasQuestion &&
                 c.phase != TestPhase.done) {
@@ -54,7 +52,6 @@ class QuestionPage extends StatelessWidget {
               );
             }
 
-            // 3) Done state -> navigate to results page (not render results here)
             if (c.phase == TestPhase.done || !c.hasQuestion) {
               if (c.isLoading) {
                 return Column(
@@ -114,7 +111,6 @@ class QuestionPage extends StatelessWidget {
               );
             }
 
-            // 4) Normal question rendering
             final q = c.question!;
             final isLikert = q.isLikert;
             final isSingleChoice = q.isSingleChoice;

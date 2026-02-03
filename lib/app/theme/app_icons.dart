@@ -21,8 +21,8 @@ abstract class AppIcons {
    *  🎓 الدليل الجامعي
    * --------------------------------- */
 
-  static final IconData college = Icons.corporate_fare_rounded;
-  static final IconData university = Icons.account_balance;
+  static const IconData college = Icons.corporate_fare_rounded;
+  static const IconData university = Icons.account_balance;
   static final IconData department = Icons.apartment;
   static final IconData major = Icons.school_outlined;
 
@@ -57,6 +57,7 @@ abstract class AppIcons {
    * --------------------------------- */
 
   static const IconData settings = EvaIcons.settingsOutline;
+  static const IconData dark_mode = Icons.dark_mode_outlined;
   static const IconData help = EvaIcons.questionMarkCircleOutline;
   static const IconData info = EvaIcons.infoOutline;
   static const IconData logout = EvaIcons.logOutOutline;
@@ -70,6 +71,7 @@ abstract class AppIcons {
   static const IconData error = EvaIcons.closeCircleOutline;
   static const IconData favorite = Icons.favorite;
   static const IconData chevronleft = Icons.chevron_left;
+  static const IconData test = Icons.note;
 
   /* ---------------------------------
    *  ➕ أفعال

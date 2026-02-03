@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_9/app/theme/widgets/soft_background_bubbles.dart';
 import 'package:flutter_application_9/feature/test/logic/tests_controller.dart';
 import 'package:flutter_application_9/feature/test/pages/test_results_page.dart';
 import 'package:provider/provider.dart';
@@ -8,9 +9,9 @@ import '../../../app/theme/app_icons.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_text_styles.dart';
 import '../logic/profile_controller.dart';
-
-// ✅ إذا عندك خلفية فقاعات فعّالة، فعّل الاستيراد الصحيح هنا
-// import '../../../app/theme/widgets/soft_background_bubbles.dart';
+import 'edit_profile_page.dart';
+import 'my_results_page.dart';
+import 'settings_page.dart';
 
 class ProfileHomePage extends StatelessWidget {
   const ProfileHomePage({super.key});
@@ -18,13 +19,6 @@ class ProfileHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.watch<ProfileController>();
-
-    // ✅ مهم: بما أنك تعمل ..load() في app.dart، لا داعي لاستدعاء load هنا.
-    // لو لازلت تحتاجه في صفحة "ملفي" فقط، خليه لكن بشرط واحد:
-    // (أنا أنصح تحذفه الآن لتفادي أي إعادة تحميل خلال البناء)
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (!c.isLoading && !c.hasData && c.error == null) c.load();
-    // });
 
     if (c.isLoading && !c.hasData) {
       return const Center(child: CircularProgressIndicator());
@@ -61,10 +55,8 @@ class ProfileHomePage extends StatelessWidget {
     return SizedBox.expand(
       child: Stack(
         children: [
-          // ✅ الخلفية (فعّلها لما تتأكد من اسم الملف)
-          // const Positioned.fill(child: SoftBackgroundBubbles()),
+          const Positioned.fill(child: SoftBackgroundBubbles()),
 
-          // ✅ أهم سطر لحل مشكلة القيود: ListView داخل Positioned.fill
           Positioned.fill(
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -84,7 +76,7 @@ class ProfileHomePage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(p.fullName, style: AppTextStyles.h2),
+                            Text(p.full_name, style: AppTextStyles.h2),
                             const SizedBox(height: 4),
                             Text(p.school, style: AppTextStyles.bodyMuted),
                           ],
@@ -188,12 +180,22 @@ class ProfileHomePage extends StatelessWidget {
                 _MenuTile(
                   icon: AppIcons.edit,
                   title: 'تعديل الملف',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const EditProfilePage(),
+                      ),
+                    );
+                  },
                 ),
                 _MenuTile(
                   icon: AppIcons.schedule,
                   title: 'سجل نتائجي',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const MyResultsPage()),
+                    );
+                  },
                 ),
                 _MenuTile(
                   icon: AppIcons.favorite,
@@ -208,7 +210,11 @@ class ProfileHomePage extends StatelessWidget {
                 _MenuTile(
                   icon: AppIcons.settings,
                   title: 'الإعدادات',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const SettingsPage()),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: AppSpacing.lg),

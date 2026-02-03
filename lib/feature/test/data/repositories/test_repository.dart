@@ -3,6 +3,7 @@ import 'package:flutter_application_9/feature/test/data/dataSource/test_local_ds
 import 'package:flutter_application_9/feature/test/data/models/major_score_model.dart';
 import 'package:flutter_application_9/feature/test/data/models/question_choice_model.dart';
 import 'package:flutter_application_9/feature/test/data/models/question_trait_weight_model.dart';
+import 'package:flutter_application_9/feature/test/data/models/attempt_summary_model.dart';
 
 import '../models/test_model.dart';
 import '../models/question_model.dart';
@@ -199,10 +200,28 @@ class TestRepository {
 
   Future<int?> getLastCompletedAttemptId({
     required int testId,
-    required int studentId,
+    int? studentId,
   }) async {
     final db = await DbHelper.instance.database;
     final ds = TestLocalDataSource(db);
     return ds.getLastCompletedAttemptId(testId: testId, studentId: studentId);
+  }
+
+
+  Future<List<AttemptSummaryModel>> getCompletedAttempts({
+    required int testId,
+    int? studentId,
+    int limit = 50,
+  }) async {
+    final db = await DbHelper.instance.database;
+    final ds = TestLocalDataSource(db);
+
+    final rows = await ds.getCompletedAttempts(
+      testId: testId,
+      studentId: studentId,
+      limit: limit,
+    );
+
+    return rows.map(AttemptSummaryModel.from_map).toList(growable: false);
   }
 }

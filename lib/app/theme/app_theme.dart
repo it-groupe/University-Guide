@@ -92,4 +92,44 @@ abstract class AppTheme {
       thickness: 1,
     ),
   );
+
+
+  static ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: const Color(0xFF0B1220),
+    fontFamily: 'Tajawal',
+    colorScheme: const ColorScheme.dark(
+      primary: AppColorScheme.brandPrimary,
+      secondary: AppColorScheme.brandSecondary,
+      surface: Color(0xFF0F172A),
+      error: AppColorScheme.danger,
+    ),
+    appBarTheme: const AppBarTheme(
+      elevation: 0,
+      centerTitle: true,
+      backgroundColor: Color(0xFF0F172A),
+      foregroundColor: Colors.white,
+      titleTextStyle: AppTextStyles.h2,
+    ),
+    textTheme: const TextTheme(
+      headlineLarge: AppTextStyles.h1,
+      headlineMedium: AppTextStyles.h2,
+      bodyMedium: AppTextStyles.body,
+      bodySmall: AppTextStyles.bodyMuted,
+      labelMedium: AppTextStyles.label,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.button),
+        ),
+        backgroundColor: AppColorScheme.brandPrimary,
+        foregroundColor: Colors.white,
+        textStyle: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ),
+  );
+
 }
