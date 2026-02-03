@@ -23,7 +23,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   // Login
   final _loginFormKey = GlobalKey<FormState>();
-  final _username = TextEditingController();
+  final _username = TextEditingController(); // email
   final _loginPass = TextEditingController();
   bool _loginObscure = true;
 
@@ -37,6 +37,19 @@ class _LoginPageState extends State<LoginPage> {
   int _tabIndex = 0; // 0 login, 1 register
 
   static const String _logoAssetPath = 'assets/images/logo.png';
+
+  @override
+  void initState() {
+    super.initState();
+
+    // إذا كانت الجلسة محفوظة (session) ادخل مباشرة للواجهة الرئيسية
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = context.read<AuthController>();
+      if (auth.isLoggedIn) {
+        _goHome();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -59,33 +72,55 @@ class _LoginPageState extends State<LoginPage> {
     if (!(_loginFormKey.currentState?.validate() ?? false)) return;
 
     final auth = context.read<AuthController>();
-    await auth.login(
-      username: _username.text.trim(),
-      password: _loginPass.text,
-    );
-    await _goHome();
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      await auth.login(
+        username: _username.text.trim(), // email
+        password: _loginPass.text,
+      );
+      await _goHome();
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(auth.lastError ?? 'فشل تسجيل الدخول')),
+      );
+    }
   }
 
   Future<void> _register() async {
     if (!(_registerFormKey.currentState?.validate() ?? false)) return;
 
     final auth = context.read<AuthController>();
-    await auth.register(
-      name: _regName.text.trim(),
-      email: _regEmail.text.trim(),
-      password: _regPass.text,
-    );
-    await _goHome();
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      await auth.register(
+        name: _regName.text.trim(),
+        email: _regEmail.text.trim(),
+        password: _regPass.text,
+      );
+      await _goHome();
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(auth.lastError ?? 'فشل إنشاء الحساب')),
+      );
+    }
   }
 
   Future<void> _guest() async {
     final auth = context.read<AuthController>();
+    if (auth.isLoading) return;
+
     await auth.loginAsGuest();
     await _goHome();
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthController>();
+
     return AppScaffold(
       body: SafeArea(
         child: Directionality(
@@ -157,12 +192,16 @@ class _LoginPageState extends State<LoginPage> {
                                   _TabPill(
                                     label: 'تسجيل دخول',
                                     selected: _tabIndex == 0,
-                                    onTap: () => setState(() => _tabIndex = 0),
+                                    onTap: auth.isLoading
+                                        ? () {}
+                                        : () => setState(() => _tabIndex = 0),
                                   ),
                                   _TabPill(
                                     label: 'إنشاء حساب',
                                     selected: _tabIndex == 1,
-                                    onTap: () => setState(() => _tabIndex = 1),
+                                    onTap: auth.isLoading
+                                        ? () {}
+                                        : () => setState(() => _tabIndex = 1),
                                   ),
                                 ],
                               ),
@@ -205,7 +244,7 @@ class _LoginPageState extends State<LoginPage> {
                             SizedBox(
                               width: double.infinity,
                               child: OutlinedButton(
-                                onPressed: _guest,
+                                onPressed: auth.isLoading ? null : _guest,
                                 style: OutlinedButton.styleFrom(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
@@ -217,7 +256,15 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   foregroundColor: AppColorScheme.textPrimary,
                                 ),
-                                child: const Text('تسجيل الدخول كضيف'),
+                                child: auth.isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text('تسجيل الدخول كضيف'),
                               ),
                             ),
                           ],
@@ -295,6 +342,8 @@ class _LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthController>();
+
     return Form(
       key: formKey,
       child: Column(
@@ -307,7 +356,7 @@ class _LoginForm extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              'ادخل اسم المستخدم وكلمة المرور',
+              'ادخل الإيميل وكلمة المرور',
               style: AppTextStyles.bodyMuted,
             ),
           ),
@@ -315,10 +364,15 @@ class _LoginForm extends StatelessWidget {
 
           TextFormField(
             controller: username,
+            keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(hintText: 'اسم المستخدم'),
-            validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'اكتب اسم المستخدم' : null,
+            decoration: const InputDecoration(hintText: 'الإيميل'),
+            validator: (v) {
+              final s = (v ?? '').trim();
+              if (s.isEmpty) return 'اكتب الإيميل';
+              if (!s.contains('@')) return 'اكتب إيميل صحيح';
+              return null;
+            },
           ),
           const SizedBox(height: AppSpacing.md),
 
@@ -346,8 +400,17 @@ class _LoginForm extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: onSubmit,
-              child: const Text('تسجيل'),
+              onPressed: auth.isLoading ? null : onSubmit,
+              child: auth.isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('تسجيل'),
             ),
           ),
         ],
@@ -378,6 +441,8 @@ class _RegisterForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthController>();
+
     return Form(
       key: formKey,
       child: Column(
@@ -443,8 +508,17 @@ class _RegisterForm extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: onSubmit,
-              child: const Text('إنشاء حساب'),
+              onPressed: auth.isLoading ? null : onSubmit,
+              child: auth.isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('إنشاء حساب'),
             ),
           ),
         ],

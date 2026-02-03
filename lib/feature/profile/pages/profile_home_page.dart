@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_9/app/theme/widgets/soft_background_bubbles.dart';
+import 'package:flutter_application_9/feature/auth/logic/auth_controller.dart';
 import 'package:flutter_application_9/feature/test/logic/tests_controller.dart';
 import 'package:flutter_application_9/feature/test/pages/test_results_page.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,13 @@ class ProfileHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthController>();
     final c = context.watch<ProfileController>();
+
+    final displayName = auth.displayName;
+    final subtitle =
+        auth.email ??
+        (c.profile?.school.isNotEmpty == true ? c.profile!.school : '—');
 
     if (c.isLoading && !c.hasData) {
       return const Center(child: CircularProgressIndicator());
@@ -46,22 +53,20 @@ class ProfileHomePage extends StatelessWidget {
       );
     }
 
-    if (!c.hasData) {
+    if (!c.hasData && auth.isGuest) {
+    } else if (!c.hasData) {
       return const Center(child: CircularProgressIndicator());
     }
-
-    final p = c.profile!;
 
     return SizedBox.expand(
       child: Stack(
         children: [
           const Positioned.fill(child: SoftBackgroundBubbles()),
-
           Positioned.fill(
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
-                // ===== Header Card =====
+                // Header Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.md),
@@ -76,9 +81,9 @@ class ProfileHomePage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(p.full_name, style: AppTextStyles.h2),
+                            Text(displayName, style: AppTextStyles.h2),
                             const SizedBox(height: 4),
-                            Text(p.school, style: AppTextStyles.bodyMuted),
+                            Text(subtitle, style: AppTextStyles.bodyMuted),
                           ],
                         ),
                       ),
@@ -105,7 +110,7 @@ class ProfileHomePage extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // ===== Test results card =====
+                // Test results card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.md),
@@ -125,7 +130,6 @@ class ProfileHomePage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
-
                       ConstrainedBox(
                         constraints: const BoxConstraints(
                           maxWidth: 140,
@@ -135,16 +139,12 @@ class ProfileHomePage extends StatelessWidget {
                         ),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(
-                              0,
-                              40,
-                            ), // يكسر minimumSize القادم من الـ Theme
+                            minimumSize: const Size(0, 40),
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                           ),
                           onPressed: () async {
                             final testCtrl = context.read<TestsController>();
-
                             final messenger = ScaffoldMessenger.of(context);
                             final nav = Navigator.of(context);
 
@@ -166,7 +166,6 @@ class ProfileHomePage extends StatelessWidget {
                               ),
                             );
                           },
-
                           child: const Text('عرض النتائج'),
                         ),
                       ),
@@ -176,11 +175,20 @@ class ProfileHomePage extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // ===== Menu list =====
+                // Menu list
                 _MenuTile(
                   icon: AppIcons.edit,
                   title: 'تعديل الملف',
                   onTap: () {
+                    if (auth.isGuest) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('سجّل دخولك أولاً لتعديل بياناتك'),
+                        ),
+                      );
+                      return;
+                    }
+
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => const EditProfilePage(),
@@ -188,6 +196,7 @@ class ProfileHomePage extends StatelessWidget {
                     );
                   },
                 ),
+
                 _MenuTile(
                   icon: AppIcons.schedule,
                   title: 'سجل نتائجي',
@@ -197,6 +206,7 @@ class ProfileHomePage extends StatelessWidget {
                     );
                   },
                 ),
+
                 _MenuTile(
                   icon: AppIcons.favorite,
                   title: 'المفضلة',

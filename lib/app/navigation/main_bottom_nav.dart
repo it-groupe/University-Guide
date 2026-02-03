@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:flutter_application_9/app/navigation/app_drawer.dart';
 import 'package:flutter_application_9/app/theme/widgets/home_appbar_widget.dart';
+import 'package:flutter_application_9/feature/auth/logic/auth_controller.dart';
 import 'package:flutter_application_9/feature/auth/pages/login_page.dart';
 
 import '../theme/app_color_scheme.dart';
@@ -22,10 +25,7 @@ class MainBottomNav extends StatefulWidget {
 
 class _MainBottomNavState extends State<MainBottomNav> {
   int _navIndex = 0;
-  bool _isGuest = false; // false = مسجل, true = زائر
-  String _userName = 'عبدالله';
-  void onMenuTap() {}
-  void onNotificationsTap() {}
+
   static const _titles = <String>['الرئيسية', 'بحث', 'اختبار', 'ملفي'];
 
   final _pages = const <Widget>[
@@ -35,32 +35,30 @@ class _MainBottomNavState extends State<MainBottomNav> {
     ProfileHomePage(),
   ];
 
-  void _goToLogin() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-    );
-  }
-
-  void _logout() {
-    setState(() {
-      _isGuest = true;
-      _userName = 'زائر';
-      _navIndex = 0;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthController>();
+
     return Scaffold(
       backgroundColor: AppColorScheme.mainbackgroun,
+
       drawer: AppDrawer(
-        isGuest: _isGuest,
-        userName: _userName,
+        isGuest: auth.isGuest,
+        userName: auth.displayName,
+
         onHomeTap: () => setState(() => _navIndex = 0),
         onSearchTap: () => setState(() => _navIndex = 1),
-        onLoginTap: _goToLogin,
-        onLogoutTap: _logout,
+
+        onLoginTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+          );
+        },
+
+        onLogoutTap: () async {
+          await context.read<AuthController>().logout();
+        },
       ),
 
       appBar: PreferredSize(
@@ -74,7 +72,7 @@ class _MainBottomNavState extends State<MainBottomNav> {
         ),
       ),
 
-      //  safeArea تم استخدامها هنا عشان تمنع تداخل البادنج الخاص بال ابار مع البادنج الخاص بالبودي
+      // safeArea هنا لمنع تداخل البادنج الخاص بالـ AppBar مع البودّي
       body: SafeArea(
         top: false,
         child: Directionality(
@@ -101,16 +99,13 @@ class _MainBottomNavState extends State<MainBottomNav> {
             child: BottomNavigationBar(
               currentIndex: _navIndex,
               onTap: (i) => setState(() => _navIndex = i),
-
               type: BottomNavigationBarType.fixed,
               backgroundColor: AppColorScheme.mainbackgroun,
               elevation: 0,
-
               selectedItemColor: AppColorScheme.brandPrimary,
               unselectedItemColor: AppColorScheme.textDisabled,
               selectedLabelStyle: AppTextStyles.label,
               unselectedLabelStyle: AppTextStyles.label,
-
               items: const [
                 BottomNavigationBarItem(
                   icon: Icon(AppIcons.home),
